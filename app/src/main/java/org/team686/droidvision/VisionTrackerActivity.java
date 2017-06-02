@@ -1,4 +1,4 @@
-package com.team254.cheezdroid;
+package org.team686.droidvision;
 
 import android.Manifest;
 import android.app.Activity;
@@ -35,11 +35,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.support.v4.app.ActivityCompat;
 
-import com.team254.cheezdroid.comm.RobotConnectionStateListener;
-import com.team254.cheezdroid.comm.RobotConnectionStatusBroadcastReceiver;
+import org.team686.droidvision.comm.RobotConnectionStateListener;
+import org.team686.droidvision.comm.RobotConnectionStatusBroadcastReceiver;
 
 import org.florescu.android.rangeseekbar.RangeSeekBar;
-import org.team686.droidvision.VisionTrackerGLSurfaceView;
 
 import java.util.Timer;
 import java.util.TimerTask;

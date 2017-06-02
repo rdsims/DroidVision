@@ -1,4 +1,4 @@
-package com.team254.cheezdroid;
+package org.team686.droidvision;
 
 import android.app.Application;
 import android.content.Context;
@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.PowerManager;
 
-import com.team254.cheezdroid.comm.RobotConnection;
-
-import java.util.Arrays;
+import org.team686.droidvision.comm.RobotConnection;
 
 public class AppContext extends Application {
 

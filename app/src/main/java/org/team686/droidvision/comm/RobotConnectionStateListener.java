@@ -1,4 +1,4 @@
-package com.team254.cheezdroid.comm;
+package org.team686.droidvision.comm;
 
 public interface RobotConnectionStateListener {
     void robotConnected();

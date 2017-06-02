@@ -1,11 +1,8 @@
 package org.team686.droidvision;
 
-import com.team254.cheezdroid.NativePart;
-import com.team254.cheezdroid.Preferences;
-import com.team254.cheezdroid.R;
-import com.team254.cheezdroid.comm.RobotConnection;
-import com.team254.cheezdroid.comm.VisionUpdate;
-import com.team254.cheezdroid.comm.messages.TargetUpdateMessage;
+import org.team686.droidvision.comm.RobotConnection;
+import org.team686.droidvision.comm.VisionUpdate;
+import org.team686.droidvision.comm.messages.TargetUpdateMessage;
 
 import org.opencv.android.BetterCamera2Renderer;
 import org.opencv.android.BetterCameraGLSurfaceView;

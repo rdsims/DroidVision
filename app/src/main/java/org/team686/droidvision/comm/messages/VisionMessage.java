@@ -1,4 +1,4 @@
-package com.team254.cheezdroid.comm.messages;
+package org.team686.droidvision.comm.messages;
 
 
 import android.util.Log;

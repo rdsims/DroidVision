@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.team254.cheezdroid;
+package org.team686.droidvision;
 
 import android.app.Activity;
 import android.os.Bundle;

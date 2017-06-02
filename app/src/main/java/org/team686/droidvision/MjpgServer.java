@@ -1,15 +1,12 @@
-package com.team254.cheezdroid;
+package org.team686.droidvision;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.util.Log;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;

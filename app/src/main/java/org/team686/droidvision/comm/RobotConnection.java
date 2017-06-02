@@ -1,15 +1,13 @@
-package com.team254.cheezdroid.comm;
+package org.team686.droidvision.comm;
 
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.team254.cheezdroid.RobotEventBroadcastReceiver;
-import com.team254.cheezdroid.comm.messages.HeartbeatMessage;
-import com.team254.cheezdroid.comm.messages.OffWireMessage;
-import com.team254.cheezdroid.comm.messages.VisionMessage;
-
-import org.json.JSONObject;
+import org.team686.droidvision.RobotEventBroadcastReceiver;
+import org.team686.droidvision.comm.messages.HeartbeatMessage;
+import org.team686.droidvision.comm.messages.OffWireMessage;
+import org.team686.droidvision.comm.messages.VisionMessage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
