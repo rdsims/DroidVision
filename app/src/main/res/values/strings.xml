@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">DroidVision Goal Tracking</string>
+    <string name="app_name">Vision2016</string>
     <string name="request_permission">This app needs camera permission</string>
 
     <string name="threshold_h_min_key">threshold_h_min_key</string>
@@ -11,7 +11,7 @@
     <string name="threshold_v_min_key">threshold_v_min_key</string>
     <string name="threshold_v_max_key">threshold_v_max_key</string>
 
-    <string name="device_admin_label">DroidVision</string>
-    <string name="device_admin_description">Enable device administration capabilities for DroidVision for safe UI during matches.</string>
+    <string name="device_admin_label">Vision2016</string>
+    <string name="device_admin_description">Enable device administration capabilities for DroidVision2016 for safe UI during matches.</string>
 
 </resources>
