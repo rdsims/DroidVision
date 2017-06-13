@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.team686.droidvision2016"
+    package="org.team686.droidvision2017"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -18,7 +18,7 @@
     <application
         android:name=".AppContext"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/eye_gear"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
         <activity
             android:name=".VisionTrackerActivity"

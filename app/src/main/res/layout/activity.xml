@@ -4,7 +4,7 @@
     android:keepScreenOn="true" >
 
 
-    <org.team686.droidvision2016.VisionTrackerGLSurfaceView
+    <org.team686.droidvision2017.VisionTrackerGLSurfaceView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/my_gl_surface_view" />

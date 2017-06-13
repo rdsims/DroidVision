@@ -1,6 +1,6 @@
 #include "image_processor.h"
 
-JNIEXPORT void JNICALL Java_org_team686_droidvision2016_NativePart_processFrame(
+JNIEXPORT void JNICALL Java_org_team686_droidvision2017_NativePart_processFrame(
     JNIEnv *env,
     jclass cls,
     jint tex1,
