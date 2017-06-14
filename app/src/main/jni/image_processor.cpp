@@ -1,5 +1,6 @@
 #include "image_processor.h"
 
+#include <vector>
 #include <algorithm>
 
 #include <GLES2/gl2.h>
@@ -10,6 +11,8 @@
 #include <opencv2/core/ocl.hpp>
 
 #include "common.hpp"
+
+using namespace std;
 
 enum DisplayMode
 {
@@ -25,10 +28,26 @@ struct TargetInfo
     double centroid_y;
     double width;
     double height;
-    std::vector<cv::Point> points;
+    vector<cv::Point> points;
 };
 
-std::vector<TargetInfo> processImpl(int w, int h, int texOut, DisplayMode mode,
+
+struct ContourInfo
+{
+    vector<cv::Point> contour;
+    double area;
+};
+
+struct byArea
+{
+    bool operator() (ContourInfo const &a, ContourInfo const &b)
+    {
+        return a.area < b.area;
+    }
+};
+
+
+vector<TargetInfo> processImpl(int w, int h, int texOut, DisplayMode mode,
                                     int h_min, int h_max, int s_min, int s_max,
                                     int v_min, int v_max)
 {
@@ -60,51 +79,66 @@ std::vector<TargetInfo> processImpl(int w, int h, int texOut, DisplayMode mode,
     //-----------------------------------
     t = getTimeMs();
     static cv::Mat thresh;
-    cv::inRange(hsv, cv::Scalar(h_min, s_min, v_min),
-              cv::Scalar(h_max, s_max, v_max), thresh);
+    cv::inRange(hsv, cv::Scalar(h_min, s_min, v_min), cv::Scalar(h_max, s_max, v_max), thresh);
     LOGD("inRange() costs %d ms", getTimeInterval(t));
 
-    t = getTimeMs();
-    static cv::Mat contour_input;
-    contour_input = thresh.clone();
-    std::vector<std::vector<cv::Point>> contours;
-    std::vector<cv::Point> convex_contour;
-    std::vector<cv::Point> poly;
-    std::vector<TargetInfo> targets;
-    std::vector<TargetInfo> rejected_targets;
+    vector<TargetInfo> targets;
+    vector<TargetInfo> rejected_targets;
 
     //----------------------------------------
     // Find contours around thresholded image
     //----------------------------------------
-    cv::findContours(contour_input, contours, cv::RETR_EXTERNAL,
-                   cv::CHAIN_APPROX_TC89_KCOS);
+    t = getTimeMs();
+    static cv::Mat contour_input;
+    contour_input = thresh.clone();
+    vector<vector<cv::Point>> contours;
+    cv::findContours(contour_input, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_TC89_KCOS);
 
-    //----------------------------------------
-    // For each contour...
-    //----------------------------------------
-    for (auto &contour : contours)
+    // need at least 2 halves
+    if (contours.size() >= 2)
     {
         //----------------------------------------
-        // Find a convex hull around the contour
+        // Sort contours by area
         //----------------------------------------
-        convex_contour.clear();
-        cv::convexHull(contour, convex_contour, false);
+        vector<ContourInfo> sortedContour;
+        sortedContour.resize(contours.size());
+        for (int k  = 0; k < contours.size(); k++)
+        {
+            sortedContour[k].contour = contours[k];
+            sortedContour[k].area = cv::contourArea(contours[k]);
+        }
+        sort(sortedContour.begin(), sortedContour.end(), byArea());
+
+        //----------------------------------------------------------------
+        // The true peg target should consist of the two largest contours
+        //----------------------------------------------------------------
+        vector<cv::Point> goal;
+        goal.insert(goal.end(), sortedContour[0].contour.begin(), sortedContour[0].contour.end());
+        goal.insert(goal.end(), sortedContour[1].contour.begin(), sortedContour[1].contour.end());
+
+        //----------------------------------------
+        // Find a convex hull around the goal
+        //----------------------------------------
+        vector<cv::Point> convex_goal;
+        convex_goal.clear();
+        cv::convexHull(goal, convex_goal, false);
 
         //------------------------------------------------
         // Approximate convex hull lines with polynomials
         //------------------------------------------------
+        vector<cv::Point> poly;
         poly.clear();
-        cv::approxPolyDP(convex_contour, poly, 20, true);
+        cv::approxPolyDP(convex_goal, poly, 20, true);
         if (poly.size() == 4 && cv::isContourConvex(poly))
         {
             //------------------------------------------------
             // Calculate centroid, height, width of contour
             //------------------------------------------------
             TargetInfo target;
-            int min_x = std::numeric_limits<int>::max();
-            int max_x = std::numeric_limits<int>::min();
-            int min_y = std::numeric_limits<int>::max();
-            int max_y = std::numeric_limits<int>::min();
+            int min_x = numeric_limits<int>::max();
+            int max_x = numeric_limits<int>::min();
+            int min_y = numeric_limits<int>::max();
+            int max_y = numeric_limits<int>::min();
             target.centroid_x = 0;
             target.centroid_y = 0;
             for (auto point : poly)
@@ -135,77 +169,76 @@ std::vector<TargetInfo> processImpl(int w, int h, int texOut, DisplayMode mode,
             const double kMaxTargetWidth = 300;
             const double kMinTargetHeight = 10;
             const double kMaxTargetHeight = 100;
-            if (target.width < kMinTargetWidth || target.width > kMaxTargetWidth ||
-                target.height < kMinTargetHeight ||
-                target.height > kMaxTargetHeight)
+            if (target.width < kMinTargetWidth || target.height < kMinTargetHeight ||
+                target.width > kMaxTargetWidth || target.height > kMaxTargetHeight)
             {
                 LOGD("Rejecting target due to size");
-                rejected_targets.push_back(std::move(target));
-                continue;
+                rejected_targets.push_back(move(target));
             }
-
-            //------------------------------------------------
-            // Filter based on shape (angles of sides)
-            //------------------------------------------------
-            const double kNearlyHorizontalSlope = 1 / 1.25;
-            const double kNearlyVerticalSlope = 1.25;
-            int num_nearly_horizontal_slope = 0;
-            int num_nearly_vertical_slope = 0;
-            bool last_edge_vertical = false;
-            for (size_t i = 0; i < 4; ++i)
+            else
             {
-                double dy = target.points[i].y - target.points[(i + 1) % 4].y;
-                double dx = target.points[i].x - target.points[(i + 1) % 4].x;
-                double slope = std::numeric_limits<double>::max();
-                if (dx != 0)
-                    slope = dy / dx;
+                //------------------------------------------------
+                // Filter based on shape (angles of sides)
+                //------------------------------------------------
+                const double kNearlyHorizontalSlope = 1 / 1.25;
+                const double kNearlyVerticalSlope = 1.25;
+                int num_nearly_horizontal_slope = 0;
+                int num_nearly_vertical_slope = 0;
+                bool last_edge_vertical = false;
+                for (size_t i = 0; i < 4; ++i)
+                {
+                    double dy = target.points[i].y - target.points[(i + 1) % 4].y;
+                    double dx = target.points[i].x - target.points[(i + 1) % 4].x;
+                    double slope = numeric_limits<double>::max();
+                    if (dx != 0)
+                        slope = dy / dx;
 
-                if (std::abs(slope) <= kNearlyHorizontalSlope &&
-                   (i == 0 || last_edge_vertical))
-                {
-                    last_edge_vertical = false;
-                    num_nearly_horizontal_slope++;
+                    if (abs(slope) <= kNearlyHorizontalSlope && (i == 0 || last_edge_vertical))
+                    {
+                        last_edge_vertical = false;
+                        num_nearly_horizontal_slope++;
+                    }
+                    else if (abs(slope) >= kNearlyVerticalSlope && (i == 0 || !last_edge_vertical))
+                    {
+                        last_edge_vertical = true;
+                        num_nearly_vertical_slope++;
+                    }
+                    else
+                    {
+                        return targets;
+                    }
                 }
-                else if (std::abs(slope) >= kNearlyVerticalSlope &&
-                        (i == 0 || !last_edge_vertical))
+                if (num_nearly_horizontal_slope != 2 && num_nearly_vertical_slope != 2)
                 {
-                    last_edge_vertical = true;
-                    num_nearly_vertical_slope++;
+                    LOGD("Rejecting target due to shape");
+                    rejected_targets.push_back(move(target));
                 }
                 else
                 {
-                    break;
+                    //------------------------------------------------
+                    // Filter based on fullness
+                    // (percentage of area filled by reflection)
+                    //------------------------------------------------
+                    const double kMinFullness = .39-.20;
+                    const double kMaxFullness = .39+.20;
+                    double original_contour_area = sortedContour[0].area + sortedContour[1].area;
+                    double poly_area = cv::contourArea(poly);
+                    double fullness = original_contour_area / poly_area;
+                    if (fullness < kMinFullness || fullness > kMaxFullness)
+                    {
+                        LOGD("Rejected target due to fullness");
+                        rejected_targets.push_back(move(target));
+                    }
+                    else
+                    {
+                        //------------------------------------------------
+                        // We found a target
+                        //------------------------------------------------
+                        LOGD("Found target at %.2lf, %.2lf...size %.2lf, %.2lf", target.centroid_x, target.centroid_y, target.width, target.height);
+                        targets.push_back(move(target));
+                    }
                 }
             }
-            if (num_nearly_horizontal_slope != 2 && num_nearly_vertical_slope != 2)
-            {
-                LOGD("Rejecting target due to shape");
-                rejected_targets.push_back(std::move(target));
-                continue;
-            }
-
-            //------------------------------------------------
-            // Filter based on fullness
-            // (percentage of area filled by reflection)
-            //------------------------------------------------
-            const double kMinFullness = .2;
-            const double kMaxFullness = .5;
-            double original_contour_area = cv::contourArea(contour);
-            double poly_area = cv::contourArea(poly);
-            double fullness = original_contour_area / poly_area;
-            if (fullness < kMinFullness || fullness > kMaxFullness)
-            {
-                LOGD("Rejected target due to fullness");
-                rejected_targets.push_back(std::move(target));
-                continue;
-            }
-
-            //------------------------------------------------
-            // We found a target
-            //------------------------------------------------
-            LOGD("Found target at %.2lf, %.2lf...size %.2lf, %.2lf",
-            target.centroid_x, target.centroid_y, target.width, target.height);
-            targets.push_back(std::move(target));
         }
     }
     LOGD("Contour analysis costs %d ms", getTimeInterval(t));
@@ -302,7 +335,7 @@ extern "C" void processFrame(JNIEnv *env, int tex1, int tex2, int w, int h,
         return;
     }
     jobjectArray targetsArray = static_cast<jobjectArray>(env->GetObjectField(destTargetInfo, sTargetsField));
-    for (int i = 0; i < std::min(numTargets, 3); ++i)
+    for (int i = 0; i < min(numTargets, 3); ++i)
     {
         jobject targetObject = env->GetObjectArrayElement(targetsArray, i);
         const auto &target = targets[i];
