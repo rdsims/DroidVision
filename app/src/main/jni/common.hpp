@@ -1,3 +1,4 @@
+#ifdef ANDROID
 #include <android/log.h>
 #define LOG_TAG "JNIpart"
 #define LOGV(...)                                                              \
@@ -20,3 +21,33 @@ static inline int64_t getTimeMs() {
 static inline int getTimeInterval(int64_t startTime) {
   return int(getTimeMs() - startTime);
 }
+#endif
+
+#ifdef _MSC_VER
+#define LOGV(...)                                                              \
+  ((void)printf(__VA_ARGS__), printf("\n"))
+#define LOGD(...)                                                              \
+  ((void)printf(__VA_ARGS__), printf("\n"))
+#define LOGI(...)                                                              \
+  ((void)printf(__VA_ARGS__), printf("\n"))
+#define LOGE(...)                                                              \
+  ((void)printf(__VA_ARGS__), printf("\n"))
+
+#include <windows.h> // QueryPerformanceCounter
+
+static inline int64_t getTimeMs()
+{
+	int64_t cnt;
+	QueryPerformanceCounter((LARGE_INTEGER *)&cnt);
+	return cnt;
+}
+
+static inline int getTimeInterval(int64_t cntStart)
+{
+	int64_t cntEnd, cntFreq;
+	QueryPerformanceCounter((LARGE_INTEGER *)&cntEnd);
+	QueryPerformanceFrequency((LARGE_INTEGER *)&cntFreq);	// counts per second
+	int intervalMs = int((cntEnd - cntStart) / double(cntFreq) * 1000.0);
+	return intervalMs;
+}
+#endif
