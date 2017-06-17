@@ -348,6 +348,15 @@ public class VisionTrackerActivity extends Activity implements RobotConnectionSt
             case R.id.thresh:
                 mView.setProcessingMode(NativePart.DISP_MODE_THRESH);
                 break;
+            case R.id.contour:
+                mView.setProcessingMode(NativePart.DISP_MODE_CONTOURS);
+                break;
+            case R.id.hull:
+                mView.setProcessingMode(NativePart.DISP_MODE_HULL);
+                break;
+            case R.id.poly:
+                mView.setProcessingMode(NativePart.DISP_MODE_POLY);
+                break;
             case R.id.targets:
                 mView.setProcessingMode(NativePart.DISP_MODE_TARGETS);
                 break;

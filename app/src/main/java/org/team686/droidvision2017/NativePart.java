@@ -8,8 +8,11 @@ public class NativePart {
 
     public static final int DISP_MODE_RAW = 0;
     public static final int DISP_MODE_THRESH = 1;
-    public static final int DISP_MODE_TARGETS = 2;
-    public static final int DISP_MODE_TARGETS_PLUS = 3;
+    public static final int DISP_MODE_CONTOURS = 2;
+    public static final int DISP_MODE_HULL = 3;
+    public static final int DISP_MODE_POLY = 4;
+    public static final int DISP_MODE_TARGETS = 5;
+    public static final int DISP_MODE_TARGETS_PLUS = 6;
 
     public static native void processFrame(
             int tex1,

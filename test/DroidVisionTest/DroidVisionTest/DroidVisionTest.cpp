@@ -27,7 +27,7 @@ int main()
 	int h_max = 255;
 	int s_min = 0;
 	int s_max = 255;
-	int v_min = 130;
+	int v_min = 150;
 	int v_max = 255;
 
 	while (true)
@@ -59,7 +59,7 @@ int main()
 			break;
 	}
 
-	// the camera will be closed automaticaly upon exit
+	// the camera will be closed automatically upon exit
 	// captureStream.close();
 
 	return 0;

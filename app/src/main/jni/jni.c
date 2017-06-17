@@ -1,6 +1,6 @@
 #ifdef ANDROID
 
-#include "image_processor.h"
+#include <jni.h>
 
 JNIEXPORT void JNICALL Java_org_team686_droidvision2017_NativePart_processFrame(
     JNIEnv *env,
@@ -16,7 +16,8 @@ JNIEXPORT void JNICALL Java_org_team686_droidvision2017_NativePart_processFrame(
     jint s_max,
     jint v_min,
     jint v_max,
-    jobject destTargetInfo) {
+    jobject destTargetInfo)
+{
   processFrame(env, tex1, tex2, w, h, mode, h_min, h_max, s_min, s_max, v_min, v_max, destTargetInfo);
 }
 
