@@ -45,8 +45,8 @@ public class VisionTrackerGLSurfaceView extends BetterCameraGLSurfaceView implem
         settings.camera_settings.put(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_OFF);
         settings.camera_settings.put(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
         settings.camera_settings.put(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
-        settings.camera_settings.put(CaptureRequest.SENSOR_EXPOSURE_TIME,  1000000L);    // 1/1000 sec shutter
-//        settings.camera_settings.put(CaptureRequest.SENSOR_EXPOSURE_TIME, 10000000L); // 1/100  sec shutter
+//        settings.camera_settings.put(CaptureRequest.SENSOR_EXPOSURE_TIME,  1000000L);    // 1/1000 sec shutter
+        settings.camera_settings.put(CaptureRequest.SENSOR_EXPOSURE_TIME, 10000000L); // 1/100  sec shutter
         settings.camera_settings.put(CaptureRequest.LENS_FOCUS_DISTANCE, .2f);
         return settings;
     }
